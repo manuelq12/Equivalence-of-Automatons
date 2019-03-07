@@ -4,10 +4,12 @@ public class MaquinaMoore {
 
 	private String[][] incidenceMatrix;
 	private String[] outputs;
+	private String[] states;
 	
-	public MaquinaMoore(int nEstados, int nEntradas) {
-		incidenceMatrix = new String[nEstados][nEntradas];
-		outputs = new String [nEstados];
+	public MaquinaMoore(int nStates, int nInputs) {
+		incidenceMatrix = new String[nStates][nInputs];
+		outputs = new String [nStates];
+		states = new String[nStates];
 	}
 
 	public String[][] getIncidenceMatrix() {

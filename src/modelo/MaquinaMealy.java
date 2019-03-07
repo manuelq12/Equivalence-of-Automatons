@@ -3,10 +3,12 @@ package modelo;
 public class MaquinaMealy {
 
 	private String[][] incidenceMatrix;
+	private String[] states;
 	
-	public MaquinaMealy(int nEstados, int nEntradas) {
+	public MaquinaMealy(int nStates, int nInputs) {
 		
-		incidenceMatrix =  new String[nEstados][nEntradas];
+		incidenceMatrix =  new String[nStates][nInputs];
+		states = new String[nStates];
 	}
 
 	public String[][] getIncidenceMatrix() {
