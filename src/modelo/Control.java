@@ -30,18 +30,15 @@ public class Control {
 
 				String[][] equivalenteUno = new String[nEstados][nEntradas];
 				// A1 A3 D3 Q2 C0 D0
+				sr.readLine();
 				String mensaje = sr.readLine();
 				int i = 0;
-				while (!mensaje.equals("---")) {
+				while (!mensaje.equals("---")&& i!=nEstados) {
 					String[] linea = mensaje.split(" ");
-					for (int j = 0; j < linea.length; j++) {
-						if ((i == 0 && j == 0) || (i == 0 && j == linea.length - 1))
-							equivalenteUno[i][j] = "null";
-
-						else {
-							equivalenteUno[i][j] = linea[j];
-						}
+					for (int j = 0; j < linea.length -1; j++) {
+						equivalenteUno[i][j]= linea[j+1];
 					}
+					i++;
 					mensaje = sr.readLine();
 				}
 				maquinaUno.setIncidenceMatrix(equivalenteUno);
@@ -63,24 +60,20 @@ public class Control {
 
 				String[][] equivalenteUno = new String[nEstados][nEntradas];
 				// A1 A3 D3 Q2 C0 OUT
+				sr.readLine();
 				String mensaje = sr.readLine();
 
 				String[] salidas = new String[arregloAlfabetos.length];
 				int i = 0;
-				while (!mensaje.equals("---")) {
+				while (!mensaje.equals("---")&& i!=nEstados) {
 					String[] linea = mensaje.split(" ");
-					for (int j = 0; j < linea.length; j++) {
-						if ((i == 0 && j == 0) || (i == 0 && j == linea.length - 1))
-							equivalenteUno[i][j] = "null";
-						else {
-							if (j != linea.length - 1) {
-								equivalenteUno[i][j] = linea[j];
-							} else {
-								if (i != 0)
-									salidas[i] = linea[j];
-							}
+					for (int j = 0; j < linea.length-2; j++) {
+						equivalenteUno[i][j]= linea[j+1];
+						if(j+1 == linea.length-2) {
+							salidas[i]=linea[j+2];
 						}
 					}
+					i++;
 					mensaje = sr.readLine();
 				}
 				maquinaUno.setIncidenceMatrix(equivalenteUno);
