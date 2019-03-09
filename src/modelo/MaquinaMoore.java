@@ -28,5 +28,12 @@ public class MaquinaMoore {
 		this.outputs = outputs;
 	}
 	
+	public String[] getStates() {
+		return states;
+	}
+
+	public void setStates(String[] states) {
+		this.states = states;
+	}	
 	
 }

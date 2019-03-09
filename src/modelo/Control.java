@@ -1,5 +1,6 @@
 package modelo;
 
+import java.awt.List;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -56,9 +57,9 @@ public class Control {
 				// A,B,C,D
 				String[] arregloAlfabetos = alfabetoEstados.split(",");
 
-				MaquinaMealy maquinaUno = new MaquinaMealy(nEstados, nEntradas);
+				MaquinaMoore maquinaDos = new MaquinaMoore(nEstados, nEntradas);
 
-				String[][] equivalenteUno = new String[nEstados][nEntradas];
+				String[][] equivalenteDos = new String[nEstados][nEntradas];
 				// A1 A3 D3 Q2 C0 OUT
 				sr.readLine();
 				String mensaje = sr.readLine();
@@ -68,7 +69,7 @@ public class Control {
 				while (!mensaje.equals("---")&& i!=nEstados) {
 					String[] linea = mensaje.split(" ");
 					for (int j = 0; j < linea.length-2; j++) {
-						equivalenteUno[i][j]= linea[j+1];
+						equivalenteDos[i][j]= linea[j+1];
 						if(j+1 == linea.length-2) {
 							salidas[i]=linea[j+2];
 						}
@@ -76,10 +77,10 @@ public class Control {
 					i++;
 					mensaje = sr.readLine();
 				}
-				maquinaUno.setIncidenceMatrix(equivalenteUno);
-				maquinaUno.setStates(arregloAlfabetos);
-				maquinaUno.setOutputs(salidas);
-				imprimirMoore(maquinaUno);
+				maquinaDos.setIncidenceMatrix(equivalenteDos);
+				maquinaDos.setStates(arregloAlfabetos);
+				maquinaDos.setOutputs(salidas);
+				imprimirMoore(maquinaDos);
 			}
 			sr.close();
 
@@ -101,18 +102,20 @@ public class Control {
 	public static void imprimirMealy(MaquinaMealy maquina) {
 		String[][] matrix= maquina.getIncidenceMatrix();
 		
-		String imprimir="";
 		for (int i = 0; i < matrix.length; i++) {
+			String imprimir="";
 			for (int j = 0; j < matrix[0].length; j++) {
 				imprimir+=matrix[i][j]+" ";
 			}
 			System.out.println(imprimir);
 		}
 	}
-	public static void imprimirMoore(MaquinaMealy maquina) {
+	
+	public static void imprimirMoore(MaquinaMoore maquina) {
 		String[][] matrix= maquina.getIncidenceMatrix();
-		String imprimir="";
+		
 		for (int i = 0; i < matrix.length; i++) {
+			String imprimir="";
 			for (int j = 0; j < matrix[0].length; j++) {
 				imprimir+=matrix[i][j]+" ";
 			}
@@ -123,5 +126,7 @@ public class Control {
 			System.out.println(salidas[i]);
 		}
 	}
+	
+	
 
 }
