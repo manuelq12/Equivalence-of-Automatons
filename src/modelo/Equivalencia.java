@@ -10,8 +10,11 @@ public class Equivalencia {
 
 	public MaquinaMealy m1;
 	public MaquinaMealy m2;
+	public MaquinaMealy m3Suma;
+	
 	public MaquinaMoore o1;
 	public MaquinaMoore o2;
+	public MaquinaMoore o3Suma;
 
 	// Constructor para una equivalencia entre dos maquinas MEALY
 	public Equivalencia(int estadoM1, int entradasM1, String[] estadosM1, String[][] equivalenteUno, int estadoM2,
@@ -25,6 +28,32 @@ public class Equivalencia {
 		
 		maquinaDos.setIncidenceMatrix(equivalenteDos);
 		maquinaDos.setStates(estadosM2);
+		
+		m1=maquinaUno;
+		m2=maquinaDos;
+		
+		imprimirMealy(m1);
+		System.out.println("--");
+		imprimirMealy(m2);
+		
+		System.out.println("//");
+		//Paso 1
+		m1= eliminarEstadosInaccesibles(m1);
+		m2= eliminarEstadosInaccesibles(m2);
+		imprimirMealy(m1);
+		System.out.println("--");
+		imprimirMealy(m2);
+		System.out.println("//");
+		//Paso 2
+		String[] nuevasVariables= renombrarVariablesB(m1.getStates(), m2.getStates());
+		m2= nuevaMaquinaRenombrada(m2,nuevasVariables);
+		imprimirMealy(m1);
+		System.out.println("--");
+		imprimirMealy(m2);
+		System.out.println("//");
+		//Paso 3
+		m3Suma= sumaDirectaMealy(m1, m2);
+		imprimirMealy(m3Suma);
 	}
 
 	// Constructor para una equivalencia entre dos maquinas MOORE
@@ -43,6 +72,32 @@ public class Equivalencia {
 		maquinaDos.setStates(estadosM2);
 		maquinaDos.setOutputs(salidasM2);
 		
+		o1=maquinaUno;
+		o2=maquinaDos;
+		
+		imprimirMoore(o1);
+		System.out.println("--");
+		imprimirMoore(o2);
+		
+		System.out.println("//");
+		//Paso 1
+		o1= eliminarEstadosInaccesibles(o1);
+		o2= eliminarEstadosInaccesibles(o2);
+		imprimirMoore(o1);
+		System.out.println("--");
+		imprimirMoore(o2);
+		System.out.println("//");
+		//Paso 2
+		String[] nuevasVariables= renombrarVariablesB(o1.getStates(), o2.getStates());
+		o2= nuevaMaquinaRenombrada(o2,nuevasVariables);
+		imprimirMoore(o1);
+		System.out.println("--");
+		imprimirMoore(o2);
+		System.out.println("//");
+		
+		//Paso 3
+		o3Suma= sumaDirectaMoore(o1, o2);
+		imprimirMoore(o3Suma);
 	}
 
 	public boolean equivalenteMealy() {
@@ -87,7 +142,6 @@ public class Equivalencia {
 		String[] estados = maquina.getStates();
 		String[][] incide = maquina.getIncidenceMatrix();
 		Graph m = new Graph(estados.length, estados);
-
 		for (int i = 0; i < incide.length; i++) {
 			for (int j = 0; j < incide[0].length; j++) {
 				m.addEdge(estados[i].substring(0), incide[i][j].charAt(0) + "");
@@ -106,7 +160,6 @@ public class Equivalencia {
 		int nEntradas = maquina.getIncidenceMatrix()[0].length;
 		String[] arregloAlfabetos = acessibles;
 		MaquinaMealy maquinaUno = new MaquinaMealy(nEstados, nEntradas);
-
 		String[][] equivalenteUno = new String[nEstados][nEntradas];
 		String[][] anterior = maquina.getIncidenceMatrix();
 		int k = 0;
@@ -118,7 +171,6 @@ public class Equivalencia {
 				k++;
 			}
 		}
-
 		maquinaUno.setIncidenceMatrix(equivalenteUno);
 		maquinaUno.setStates(arregloAlfabetos);
 		return maquinaUno;
@@ -153,7 +205,6 @@ public class Equivalencia {
 		int nEntradas = maquina.getIncidenceMatrix()[0].length;
 		String[] arregloAlfabetos = acessibles;
 		MaquinaMoore maquinaUno = new MaquinaMoore(nEstados, nEntradas);
-
 		String[][] equivalenteUno = new String[nEstados][nEntradas];
 		String[][] anterior = maquina.getIncidenceMatrix();
 		String[] salidas = new String[nEstados];
@@ -174,14 +225,12 @@ public class Equivalencia {
 	}
 
 	public String[] renombrarVariablesB(String[] a, String[] b) {
-
 		String[] retorno = new String[b.length];
 		Random rand = new Random();
-
 		for (int i = 0; i < b.length; i++) {
 
 			if (contenido(b[i], a)) {
-				int n = rand.nextInt() + 65;
+				int n = rand.nextInt(25) + 65;
 				char nuevaLetra = (char) n;
 				retorno[i] = nuevaLetra + "";
 			} else {
@@ -196,7 +245,6 @@ public class Equivalencia {
 		String[] estadosViejos = maquina.getStates();
 		retorno.setStates(nuevosEstados);
 		String[][] adya = maquina.getIncidenceMatrix();
-
 		for (int i = 0; i < adya.length; i++) {
 			for (int j = 0; j < adya[0].length; j++) {
 				adya[i][j] = nuevosEstados[getIndex(adya[i][j], estadosViejos)];
@@ -212,7 +260,6 @@ public class Equivalencia {
 		String[] estadosViejos = maquina.getStates();
 		retorno.setStates(nuevosEstados);
 		String[][] adya = maquina.getIncidenceMatrix();
-
 		for (int i = 0; i < adya.length; i++) {
 			for (int j = 0; j < adya[0].length; j++) {
 				adya[i][j] = nuevosEstados[getIndex(adya[i][j].charAt(0) + "", estadosViejos)] + adya[i][j].charAt(1);
@@ -230,5 +277,72 @@ public class Equivalencia {
 		}
 		return -1;
 	}
-
+	public MaquinaMealy sumaDirectaMealy(MaquinaMealy a, MaquinaMealy b) {
+		MaquinaMealy retorno= new MaquinaMealy(a.getStates().length + b.getStates().length, a.getIncidenceMatrix()[0].length);
+		String[][] alist= a.getIncidenceMatrix(); 
+		String[][] blist= b.getIncidenceMatrix();
+		String[][] adya= new String[a.getStates().length + b.getStates().length][a.getIncidenceMatrix()[0].length];
+		String[] estados= concatenarListas(a.getStates(), b.getStates());
+		int k=0;
+		for (int i = 0; i < adya.length; i++) {
+			
+			if(i< alist.length) {
+			for (int j = 0; j < adya[0].length; j++) {
+				adya[i][j]=alist[i][j];
+			}
+			}
+			else {
+				for (int j = 0; j < adya[0].length; j++) {
+					adya[i][j]=blist[k][j];
+				}
+				k++;
+			}
+		}
+		retorno.setIncidenceMatrix(adya);
+		retorno.setStates(estados);
+		return retorno;
+	}
+	
+	public MaquinaMoore sumaDirectaMoore(MaquinaMoore a, MaquinaMoore b) {
+		MaquinaMoore retorno= new MaquinaMoore(a.getStates().length + b.getStates().length, a.getIncidenceMatrix()[0].length);
+		String[][] alist= a.getIncidenceMatrix(); 
+		String[][] blist= b.getIncidenceMatrix();
+		String[][] adya= new String[a.getStates().length + b.getStates().length][a.getIncidenceMatrix()[0].length];
+		String[] estados= concatenarListas(a.getStates(), b.getStates());
+		String[] salidas= concatenarListas(a.getOutputs(), b.getOutputs());
+		int k=0;
+		for (int i = 0; i < adya.length; i++) {
+			
+			if(i< alist.length) {
+			for (int j = 0; j < adya[0].length; j++) {
+				adya[i][j]=alist[i][j];
+			}
+			}
+			else {
+				for (int j = 0; j < adya[0].length; j++) {
+					adya[i][j]=blist[k][j];
+				}
+				k++;
+			}
+		}
+		retorno.setIncidenceMatrix(adya);
+		retorno.setStates(estados);
+		retorno.setOutputs(salidas);
+		return retorno;
+	}
+	
+	public String[] concatenarListas(String[] a, String[] b) {
+		String[] retorno= new String[a.length+b.length];
+		int j=0;
+		for (int i = 0; i < retorno.length; i++) {
+			if(i<a.length) {
+				retorno[i]= a[i];
+			}
+			else {
+				retorno[i]= b[j];
+				j++;
+			}
+		}
+		return retorno;
+	}
 }
