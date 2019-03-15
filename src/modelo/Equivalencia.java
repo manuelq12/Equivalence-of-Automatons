@@ -1,8 +1,6 @@
 package modelo;
 
-import java.awt.List;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Equivalencia {
@@ -37,6 +35,11 @@ public class Equivalencia {
 		imprimirMealy(m2);
 		
 		System.out.println("//");
+		// Prueba particiones 
+		
+		particionesMealy(m1);
+		
+		
 		//Paso 1
 		m1= eliminarEstadosInaccesibles(m1);
 		m2= eliminarEstadosInaccesibles(m2);
@@ -54,6 +57,7 @@ public class Equivalencia {
 		//Paso 3
 		m3Suma= sumaDirectaMealy(m1, m2);
 		imprimirMealy(m3Suma);
+		
 	}
 
 	// Constructor para una equivalencia entre dos maquinas MOORE
@@ -284,6 +288,9 @@ public class Equivalencia {
 		String[][] adya= new String[a.getStates().length + b.getStates().length][a.getIncidenceMatrix()[0].length];
 		String[] estados= concatenarListas(a.getStates(), b.getStates());
 		int k=0;
+		
+		if(blist.length== 0 || blist[0].length== 0) return a;
+		if(alist.length== 0 || alist[0].length== 0) return a;
 		for (int i = 0; i < adya.length; i++) {
 			
 			if(i< alist.length) {
@@ -330,7 +337,7 @@ public class Equivalencia {
 		retorno.setOutputs(salidas);
 		return retorno;
 	}
-	
+
 	public String[] concatenarListas(String[] a, String[] b) {
 		String[] retorno= new String[a.length+b.length];
 		int j=0;
@@ -345,4 +352,35 @@ public class Equivalencia {
 		}
 		return retorno;
 	}
+	
+	public ArrayList<ArrayList<String>> particionesMealy(MaquinaMealy maquina){
+		ArrayList<ArrayList<String>> partitions= new ArrayList<ArrayList<String>>();
+		
+	   DisJoinSet conjunto=new DisJoinSet(maquina.getStates().length);
+	   
+	   String[][] m= maquina.getIncidenceMatrix();
+	   
+		for (int i = 0; i < m.length; i++) {
+			String[] line = new String[m[0].length];
+
+			for (int j = 0; j < m[0].length; j++) {
+				line[j] = m[i][j].charAt(m[i][j].length() - 1) + "";
+			}
+
+			for (int k = i+1; k < m.length; k++) {
+				int t= 0;
+				for (int j = 0; j < m[0].length; j++) {
+					if(  (m[k][j].charAt(m[k][j].length() - 1) + "").equals(line[j])) {
+						t++;
+					}
+				}
+				if (t==line.length) {
+					conjunto.union(i, k);
+				}
+			}
+		}
+
+		return partitions;
+	}
+	
 }

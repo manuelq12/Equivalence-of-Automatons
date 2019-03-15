@@ -1,0 +1,61 @@
+-------- Ejemplos eliminar
+
+M
+4
+2
+A,B,C,D
+null 0 1 
+A D1 A0
+B C0 B1
+C B0 C0
+D A0 D0
+---
+3
+2
+A,B,C
+null 0 1 
+A B1 C0
+B C0 B1
+C A0 C0
+---
+
+O
+5
+2
+A,B,C,D,E
+null 0 1 null
+A B A 0
+B D B 1
+C A C 0
+D A D 1
+E E D 0
+---
+3
+2
+A,B,C
+null 0 1 null
+A B C 0
+B C B 1
+C A C 0
+---
+
+M
+9
+2
+A,B,C,D,E,F,G,H,J
+null 0 1 null
+A B0 C0
+B C1 D1
+C D0 E0
+D C1 B1
+E F1 E1
+F G0 C0
+G F1 G1
+H J1 B0
+J H1 D0
+---
+0
+0
+A
+null 0 1 null
+---
