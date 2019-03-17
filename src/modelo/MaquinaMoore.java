@@ -35,5 +35,15 @@ public class MaquinaMoore {
 	public void setStates(String[] states) {
 		this.states = states;
 	}	
-	
+	public int getIndex(String state) {
+		int result =0;
+		boolean found = false;
+		for(int i = 0; i < states.length && !found; i++) {
+			if(state.equals(states[i])) {
+				result = i;
+				found = true;
+			}
+		}
+		return result;
+	}
 }

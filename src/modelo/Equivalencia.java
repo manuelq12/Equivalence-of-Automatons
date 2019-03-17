@@ -1,6 +1,7 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.*;
 import java.util.Random;
 
 public class Equivalencia {
@@ -37,9 +38,6 @@ public class Equivalencia {
 		System.out.println("//");
 		// Prueba particiones 
 		
-		particionesMealy(m1);
-		
-		
 		//Paso 1
 		m1= eliminarEstadosInaccesibles(m1);
 		m2= eliminarEstadosInaccesibles(m2);
@@ -57,6 +55,9 @@ public class Equivalencia {
 		//Paso 3
 		m3Suma= sumaDirectaMealy(m1, m2);
 		imprimirMealy(m3Suma);
+		
+		particionesMealy(m3Suma);
+		
 		
 	}
 
@@ -102,6 +103,9 @@ public class Equivalencia {
 		//Paso 3
 		o3Suma= sumaDirectaMoore(o1, o2);
 		imprimirMoore(o3Suma);
+		//Paso 4
+		particionesMoore(o3Suma);
+		
 	}
 
 	public boolean equivalenteMealy() {
@@ -353,34 +357,392 @@ public class Equivalencia {
 		return retorno;
 	}
 	
+	
 	public ArrayList<ArrayList<String>> particionesMealy(MaquinaMealy maquina){
 		ArrayList<ArrayList<String>> partitions= new ArrayList<ArrayList<String>>();
+		partitions = firstPartitionMealy(maquina);
+		System.out.println(reportPartition(partitions));
 		
-	   DisJoinSet conjunto=new DisJoinSet(maquina.getStates().length);
-	   
-	   String[][] m= maquina.getIncidenceMatrix();
-	   
-		for (int i = 0; i < m.length; i++) {
-			String[] line = new String[m[0].length];
-
-			for (int j = 0; j < m[0].length; j++) {
-				line[j] = m[i][j].charAt(m[i][j].length() - 1) + "";
-			}
-
-			for (int k = i+1; k < m.length; k++) {
-				int t= 0;
-				for (int j = 0; j < m[0].length; j++) {
-					if(  (m[k][j].charAt(m[k][j].length() - 1) + "").equals(line[j])) {
-						t++;
-					}
+		ArrayList<ArrayList<String>> partitions1 = clonarPartition(partitions);
+		System.out.println("First:\n" +reportPartition(partitions));
+		ArrayList<ArrayList<String>> bpartition= new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<ArrayList<String>>> newPart = new ArrayList<ArrayList<ArrayList<String>>> ();
+		boolean done = false;
+		int x = 0;
+		while (!done) {
+			bpartition = partitions;
+			x++;
+			for (int i = 0; i < partitions.size(); i++) {
+				ArrayList<String> temp = partitions.get(i);
+				ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+				//"Problema esta aca en partitions"
+				result = partitionKplus1Mealy(temp, partitions1, maquina);
+				 System.out.println("X:"+ reportPartition(result));
+				if(result.size() == 0) {
+					result.add(temp);
 				}
-				if (t==line.length) {
-					conjunto.union(i, k);
-				}
+				//Problema esta aca
+				newPart.add(result);
 			}
+			partitions = newPartition(newPart);
+			System.out.println("Before:\n" +reportPartition(bpartition));
+			 System.out.println("m:"+ reportPartition(partitions));
+			
+			newPart = new ArrayList<ArrayList<ArrayList<String>>> ();
+			
+			done = finish(bpartition, partitions);
 		}
-
 		return partitions;
 	}
 	
+	public ArrayList<ArrayList<String>> firstPartitionMealy(MaquinaMealy maquina){
+	ArrayList<ArrayList<String>> partitions= new ArrayList<ArrayList<String>>();
+	
+   DisJoinSet conjunto=new DisJoinSet(maquina.getStates().length);
+   
+   String[][] m= maquina.getIncidenceMatrix();
+   
+	for (int i = 0; i < m.length; i++) {
+		String[] line = new String[m[0].length];
+
+		for (int j = 0; j < m[0].length; j++) {
+			line[j] = m[i][j].charAt(m[i][j].length() - 1) + "";
+		}
+
+		for (int k = 0; k < m.length; k++) {
+			int t= 0;
+			for (int j = 0; j < m[0].length; j++) {
+				if(  (m[k][j].charAt(m[k][j].length() - 1) + "").equals(line[j])) {
+					t++;
+				}
+			}
+			if (t==line.length) {
+				conjunto.union(i, k);
+			}
+		}
+	}
+	ArrayList<Integer> numPadres= new ArrayList<Integer>(); 
+	String estados[] =maquina.getStates();
+	for (int i = 0; i < m.length; i++) {
+		if(!numPadres.contains(conjunto.find(i))) numPadres.add(conjunto.find(i));
+	}
+	
+	for (int i = 0; i < numPadres.size(); i++) {
+		ArrayList<String> nueva= new ArrayList<>();
+		
+		for (int j = 0; j < m.length; j++) {
+			
+			if(conjunto.find(j)== numPadres.get(i)) {
+				nueva.add(estados[j]);
+			}
+		}
+		partitions.add(nueva);
+	}
+	return partitions;
+  }
+	public ArrayList<ArrayList<String>> partitionKplus1Mealy (ArrayList<String> firstSet, ArrayList<ArrayList<String>> otherSets, MaquinaMealy m){
+	int size = firstSet.size();
+	System.out.println("OtherSets: " + otherSets.size());
+	ArrayList<ArrayList<String>> salida = new ArrayList<ArrayList<String>>();
+	ArrayList<String> noEquivalente = new ArrayList<String>();
+	  if(size > 2) {
+		  String x = firstSet.get(0);
+		  for (int i = 1; i < size; i++) {
+			  String y = firstSet.get(i);
+			  if(!areEquivalentMealy(otherSets,x,y,m)) {
+				  noEquivalente.add(y);
+			  }  
+		  }
+		  if(noEquivalente.size() != 0) {
+			  firstSet = borrarNoEquivalente(firstSet, noEquivalente);
+			  salida.add(firstSet);
+			  salida.add(noEquivalente);			  
+		  }
+	  }
+	  return salida;
+	}
+		public boolean areEquivalentMealy (ArrayList<ArrayList<String>> otherSets, String x, String y, MaquinaMealy m) {
+		boolean equivalent = false;
+		int l = 0;
+		System.out.println("Other Sets: " + otherSets.size());
+			equivalent = auxAreEquivalentMealy(otherSets, x, y, m, l);
+		return equivalent;
+	}
+		public boolean auxAreEquivalentMealy(ArrayList<ArrayList<String>> otherSets, String x , String y , MaquinaMealy m, int n) {
+		
+		String[][] matrix = m.getIncidenceMatrix();
+		int x1 = getIndex(x, m.getStates());
+		int y1 = getIndex(y, m.getStates());
+		
+		boolean equivalent = true;
+		boolean stop = false;
+			for (int j = 0; j < matrix[0].length && equivalent; j++) {
+				String value1 = matrix[x1][j];
+				String value2 = matrix[y1][j];
+				for (int i = 0; i < otherSets.size() && !stop; i++) {
+					ArrayList<String> set = otherSets.get(i);
+					boolean fx = containsMealy(set, value1);
+					boolean fy = containsMealy(set, value2);
+					if(fx == true && fy == true) {
+						stop = true;
+						equivalent = true;
+					}
+					else if ((fx == true && fy == false) || (fy == true && fx == false) ) {
+						equivalent = false;
+						stop = true;
+					}
+				}
+				if(j < matrix[0].length) stop = false;
+				
+			}
+			
+		 return equivalent;
+		}
+	
+	//--------------------------------------------------------------------------------------------
+	
+	public ArrayList<ArrayList<String>> particionesMoore(MaquinaMoore maquina){
+		ArrayList<ArrayList<String>> partitions= new ArrayList<ArrayList<String>>();
+		partitions = firstPartition(maquina);
+		ArrayList<ArrayList<String>> partitions1 = clonarPartition(partitions);
+		System.out.println("First:\n" +reportPartition(partitions));
+		ArrayList<ArrayList<String>> bpartition= new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<ArrayList<String>>> newPart = new ArrayList<ArrayList<ArrayList<String>>> ();
+		boolean done = false;
+		int x = 0;
+		while (!done) {
+			bpartition = partitions;
+			x++;
+			for (int i = 0; i < partitions.size(); i++) {
+				ArrayList<String> temp = partitions.get(i);
+				ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+				result = partitionKplus1(temp, partitions1, maquina);
+				 System.out.println("X:"+ reportPartition(result));
+				if(result.size() == 0) {
+					result.add(temp);
+				}
+				newPart.add(result);
+			}
+			partitions = newPartition(newPart);
+			System.out.println("Before:\n" +reportPartition(bpartition));
+			 System.out.println("m:"+ reportPartition(partitions));
+			
+			newPart = new ArrayList<ArrayList<ArrayList<String>>> ();
+			
+			done = finish(bpartition, partitions);
+		}
+		return partitions;
+	}
+	
+	private ArrayList<ArrayList<String>> clonarPartition(ArrayList<ArrayList<String>> partitions) {
+		ArrayList<ArrayList<String>> p1 = new ArrayList<ArrayList<String>>();
+		for (int i = 0; i < partitions.size(); i++) {
+			p1.add(partitions.get(i));
+		}
+		return p1;
+	}
+
+	public ArrayList<ArrayList<String>> firstPartition (MaquinaMoore m){
+		String[] states = m.getStates();
+		String[] output = m.getOutputs();
+		ArrayList<String> outputs = new ArrayList<String>();
+		ArrayList<ArrayList<String>> salida = new ArrayList<ArrayList<String>>();
+		for (int i = 0; i < output.length; i++) {
+			if(!contains(outputs, output[i])) {
+				outputs.add(output[i]);
+			} 
+		}
+	  for (int i = 0; i < outputs.size(); i++) {
+		  ArrayList<String> nueva = auxFirstPartition(states, output, outputs.get(i));
+		  salida.add(nueva);
+	   }
+	  return salida;	
+	}
+	public ArrayList<String> auxFirstPartition(String[] states,String[] output, String i){
+		ArrayList<String> salida = new ArrayList<String>();
+		for (int j = 0; j < output.length; j++) {
+			if(output[j].equals(i)) {
+				salida.add(states[j]);
+			}
+		}
+		return salida;
+	}
+	
+	public ArrayList<ArrayList<String>> partitionKplus1 (ArrayList<String> firstSet, ArrayList<ArrayList<String>> otherSets, MaquinaMoore m){
+		int size = firstSet.size();
+		System.out.println("OtherSets: " + otherSets.size());
+		ArrayList<ArrayList<String>> salida = new ArrayList<ArrayList<String>>();
+		ArrayList<String> noEquivalente = new ArrayList<String>();
+	  if(size > 2) {
+		  String x = firstSet.get(0);
+		  for (int i = 1; i < size; i++) {
+			  String y = firstSet.get(i);
+			  if(!areEquivalent(otherSets,x,y,m)) {
+				  noEquivalente.add(y);
+			  }  
+		  }
+		  if(noEquivalente.size() != 0) {
+			  firstSet = borrarNoEquivalente(firstSet, noEquivalente);
+			  salida.add(firstSet);
+			  salida.add(noEquivalente);			  
+		  }
+	  }
+	  return salida;
+	}
+	public ArrayList<String> borrarNoEquivalente(ArrayList<String> f , ArrayList<String> n){
+		for (int i = 0; i < n.size(); i++) {
+			if(contains(f, n.get(i))) {
+				int r = f.indexOf(n.get(i));
+				f.remove(r);
+			}
+		}
+		return f;
+	}
+	public boolean areEquivalent (ArrayList<ArrayList<String>> otherSets, String x, String y, MaquinaMoore m) {
+		boolean equivalent = false;
+		int l = 0;
+		System.out.println("Other Sets: " + otherSets.size());
+			equivalent = auxAreEquivalent(otherSets, x, y, m, l);
+		return equivalent;
+	}
+	public boolean auxAreEquivalent(ArrayList<ArrayList<String>> otherSets, String x , String y , MaquinaMoore m, int n) {
+		
+		String[][] matrix = m.getIncidenceMatrix();
+		int x1 = m.getIndex(x);
+		int y1 = m.getIndex(y);
+		
+		boolean equivalent = true;
+		boolean stop = false;
+			for (int j = 0; j < matrix[0].length && equivalent; j++) {
+				String value1 = matrix[x1][j];
+				String value2 = matrix[y1][j];
+				for (int i = 0; i < otherSets.size() && !stop; i++) {
+					ArrayList<String> set = otherSets.get(i);
+					boolean fx = contains(set, value1);
+					boolean fy = contains(set, value2);
+					if(fx == true && fy == true) {
+						stop = true;
+						equivalent = true;
+					}
+					else if ((fx == true && fy == false) || (fy == true && fx == false) ) {
+						equivalent = false;
+						stop = true;
+					}
+				}
+				if(j < matrix[0].length) stop = false;
+				
+			}
+			
+		 return equivalent;
+		}
+	
+	
+	
+	public boolean contains(ArrayList<String> n, String out) {
+		if(n.size() == 0) {
+			return false;
+		}
+		else {
+			boolean exist = false;
+			for (int i = 0; i < n.size() && !exist; i++) {
+				if(n.get(i).equals(out)) {
+					exist = true;
+				}
+			}
+		 return exist;
+		}
+	}
+	public boolean containsMealy(ArrayList<String> n, String out) {
+		if(n.size() == 0) {
+			return false;
+		}
+		else {
+			boolean exist = false;
+			for (int i = 0; i < n.size() && !exist; i++) {
+				if(n.get(i).equals(""+out.charAt(0))){
+					exist = true;
+				}
+			}
+		 return exist;
+		}
+	}
+	public boolean verifyDifferentSets(ArrayList<String> one, ArrayList<String> two) {
+		boolean dif = false;
+		if(one.size() != two.size()) {
+			dif = true;
+		}
+		else {
+			for (int i = 0; i < one.size() && !dif; i++) {
+				if(!contains(two, one.get(i))) {
+					dif = true;
+				}
+			}
+		}
+		
+		return dif;
+	}
+	
+	public ArrayList<ArrayList<String>> getDifferentSets(ArrayList<String> n, ArrayList<ArrayList<String>> u){
+		ArrayList<ArrayList<String>> salida = new ArrayList<ArrayList<String>>();
+		for (int i = 0; i < salida.size(); i++) {
+			ArrayList<String> dif = salida.get(i);
+			if(verifyDifferentSets(n, dif)) {
+				salida.add(dif);
+			}
+		}
+		return salida;
+	}
+	public ArrayList<ArrayList<String>> newPartition(ArrayList<ArrayList<ArrayList<String>>> u){
+		ArrayList<ArrayList<String>> newP = new ArrayList<ArrayList<String>>();
+		for (int i = 0; i < u.size(); i++) {
+			int size = u.get(i).size();
+			for (int j = 0; j < size; j++) {
+				ArrayList<String> temp = new ArrayList<String>();
+				for (int k = 0; k < u.get(i).get(j).size(); k++) {
+					temp.add(u.get(i).get(j).get(k));
+				}
+				newP.add(temp);
+			}		
+		}
+		return newP;
+	}
+	public boolean finish(ArrayList<ArrayList<String>> p, ArrayList<ArrayList<String>>bp) {
+		if(p.size() != bp.size()) {
+			return false;
+		}
+		else {
+			boolean stop = false;
+			for (int i = 0; i < p.size() && !stop; i++) {
+				if(verifyDifferentSets(p.get(i), bp.get(i))) stop = true;
+			}
+			
+			if(!stop) return true;
+			return false;
+		}
+	}
+	public String reportPartition (ArrayList<ArrayList<String>> p) {
+		String mensaje = "{ ";
+		for (int i = 0; i < p.size(); i++) {
+			if(i == p.size()-1) {
+				mensaje +=  p.get(i) + " }";
+			}
+			else {				
+				mensaje += auxReportPartition(p.get(i)) + "; ";
+			}
+		}
+		return mensaje;
+	}
+	public String auxReportPartition (ArrayList<String> n) {
+		String mensaje = "{ ";
+		for (int i = 0; i < n.size(); i++) {
+			if(i == n.size()-1) {
+				mensaje += n.get(i) + " }";
+			}
+			else {
+				mensaje += n.get(i) + ", ";			
+			}
+			
+		}
+		return mensaje;
+	}
 }

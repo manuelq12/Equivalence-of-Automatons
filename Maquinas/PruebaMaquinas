@@ -59,3 +59,26 @@ J H1 D0
 A
 null 0 1 null
 ---
+
+M
+7
+2
+A,B,C,D,E,F,G
+null 0 1 null
+A B1 C0
+B D1 E0
+C D1 E0
+D F0 G1
+E F0 G1
+F B0 B1
+G C0 C1
+---
+4
+2
+H,I,J,K
+null 0 1 null
+H I1 I0
+I J1 J0
+J K0 K1
+K I0 I1
+---

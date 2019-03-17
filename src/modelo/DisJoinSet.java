@@ -31,6 +31,8 @@ public class DisJoinSet {
         return parent[x]; 
     } 
 
+
+
   
     public void union(int x, int y) 
     { 
