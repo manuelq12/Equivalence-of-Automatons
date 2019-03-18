@@ -1,18 +1,27 @@
 package modelo;
-
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileReader;
 
 public class Main {
 	public static String MEALY = "M";
 	public static String MOORE = "O";
-	public static void main(String[] args) {
+	
+	private boolean equivalente;
+	public Main() {
+		
+	}
+	public Main(String maquina) {
 		try {
-			BufferedReader sr = new BufferedReader(new InputStreamReader(System.in));
+			//BufferedReader sr = new BufferedReader();
+			File archivo = new File ("./Registro/MaquinaSolicitada.txt");
+	        FileReader fr = new FileReader (archivo);
+	         BufferedReader sr = new BufferedReader(fr);
 
-			String maquina = sr.readLine();
+			//String maquina = sr.readLine();
 			if (maquina.equals(MEALY)) {
 				String estadoM1 = sr.readLine();
+				System.out.println(estadoM1);
 				String entradasM1 = sr.readLine();
 				int nEstadosM1 = Integer.parseInt(estadoM1);
 				int nEntradasM1 = Integer.parseInt(entradasM1);
@@ -49,6 +58,8 @@ public class Main {
 					mensajeM2 = sr.readLine();
 				}
 				Equivalencia nueva= new Equivalencia(nEstadosM1, nEntradasM1, arregloAlfabetosM1, equivalenteUnoM1, nEstadosM2, nEntradasM2, arregloAlfabetosM2, equivalenteUnoM2);
+				System.out.println(nueva.isEquivalent());
+				equivalente= nueva.isEquivalent();
 			} else if (maquina.equals(MOORE)) {
 				String estadosM1 = sr.readLine();
 				String entradasM1 = sr.readLine();
@@ -95,6 +106,8 @@ public class Main {
 					mensajeM2 = sr.readLine();
 				}
 				Equivalencia nueva= new Equivalencia(nEstadosM1, nEntradasM1, arregloAlfabetosM1, equivalenteDosM1,salidasM1, nEstadosM2, nEntradasM2, arregloAlfabetosM2, equivalenteDosM2,salidasM2);
+				System.out.println(nueva.isEquivalent());
+				equivalente= nueva.isEquivalent();
 			}
 			sr.close();
 
@@ -102,5 +115,10 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-
+	public boolean isEquivalente() {
+		return equivalente;
+	}
+	public void setEquivalente(boolean equivalente) {
+		this.equivalente = equivalente;
+	}
 }
